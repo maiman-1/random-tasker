@@ -1,80 +1,39 @@
-import {App, Editor, MarkdownView, Modal, Notice, Plugin} from 'obsidian';
-import {DEFAULT_SETTINGS, MyPluginSettings, SampleSettingTab} from "./settings";
+import {App, Editor, MarkdownView, Modal, 
+	Notice, Plugin, BasesView, QueryController, 
+	HoverParent, HoverPopover, parsePropertyId, Keymap } from 'obsidian';
+import {DEFAULT_SETTINGS, RandomTaskerSettings, SampleSettingTab} from "./settings";
+export const ExampleViewType = 'example-view';
 
 // Remember to rename these classes and interfaces!
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class RandomTasker extends Plugin {
+	settings: RandomTaskerSettings;
 
 	async onload() {
-		await this.loadSettings();
-
-		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('dice', 'Sample', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status bar text');
-
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-modal-simple',
-			name: 'Open modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'replace-selected',
-			name: 'Replace selected content',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				editor.replaceSelection('Sample editor command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-modal-complex',
-			name: 'Open modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-				return false;
-			}
-		});
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			new Notice("Click");
-		});
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-
+		// Tell Obsidian about the new view type that this plugin provides.
+		this.registerBasesView(ExampleViewType, {
+			name: 'Random-Tasker',
+			icon: 'lucide-graduation-cap',
+			factory: (controller, containerEl) => {
+				return new MyBasesView(controller, containerEl)
+			},
+			options: () => ([
+				{
+				type: 'text',
+				displayName: 'Task file path prefix',
+				key: 'filePath',
+				default: 'TaskList/',
+				},
+				// ...
+			]),
+		});		
 	}
 
 	onunload() {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<MyPluginSettings>);
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<RandomTaskerSettings>);
 	}
 
 	async saveSettings() {
@@ -96,4 +55,113 @@ class SampleModal extends Modal {
 		const {contentEl} = this;
 		contentEl.empty();
 	}
+}
+
+
+export class MyBasesView extends BasesView implements HoverParent {
+
+	hoverPopover: HoverPopover | null;
+
+	readonly type = ExampleViewType;
+	private containerEl: HTMLElement;
+
+	constructor(controller: QueryController, parentEl: HTMLElement) {
+		super(controller);
+		this.containerEl = parentEl.createDiv('bases-example-view-container');
+	}
+
+	// onDataUpdated is called by Obsidian whenever there is a configuration
+	// or data change in the vault which may affect your view. For now,
+	// simply draw "Hello World" to screen.
+	public onDataUpdated(): void {
+	
+	const { app } = this;
+
+    // Retrieve the user configured order set in the Properties menu.
+    const order = this.config.getOrder();
+
+    // Clear entries created by previous iterations.
+    this.containerEl.empty();
+
+    // Collect all entries from all groups
+    const allEntries: any[] = [];
+    const configuredFilePath = String((this.config as any).get?.('filePath') ?? 'TaskList/').trim();
+    const filePath = configuredFilePath.length > 0 ? configuredFilePath : 'TaskList/';
+
+    //console.log(this.data);
+    for (const group of this.data.groupedData) {
+      //console.log(group);
+      for (const entry of group.entries) {
+        if (entry.file.path.startsWith(filePath)) {
+          //console.log(entry);
+          allEntries.push(entry);
+        }
+      }
+      //allEntries.push(...group.entries);
+    }
+
+    // If no entries, show a message
+    if (allEntries.length === 0) {
+      this.containerEl.createEl('p', { text: 'No tasks available' });
+      return;
+    }
+
+    // Select a random task
+    const randomTask = allEntries[Math.floor(Math.random() * allEntries.length)];
+
+    // Create dashboard container
+    const dashboardEl = this.containerEl.createDiv('weekly-task-dashboard');
+    
+    // Header with task title
+    const headerEl = dashboardEl.createDiv('dashboard-header');
+    const titleEl = headerEl.createEl('h2', { cls: 'task-title' });
+    
+    // Set the title (use file name)
+    //console.log(randomTask);
+    const fileName = String(randomTask.file.basename);
+    const linkEl = titleEl.createEl('a', { text: fileName });
+    linkEl.onClickEvent((evt) => {
+      if (evt.button !== 0 && evt.button !== 1) return;
+      evt.preventDefault();
+      const path = randomTask.file.path;
+      const modEvent = Keymap.isModEvent(evt);
+      void app.workspace.openLinkText(path, '', modEvent);
+    });
+
+    linkEl.addEventListener('mouseover', (evt) => {
+      app.workspace.trigger('hover-link', {
+        event: evt,
+        source: 'bases',
+        hoverParent: this,
+        targetEl: linkEl,
+        linktext: randomTask.file.path,
+      });
+    });
+
+    // Properties display section
+    const propertiesEl = dashboardEl.createDiv('dashboard-properties');
+    
+    for (const propertyName of order) {
+      const { type, name } = parsePropertyId(propertyName);
+      
+      // Skip the file name property since we already displayed it as title
+      if (name === 'name' && type === 'file') continue;
+
+      const value = randomTask.getValue(propertyName);
+      
+      // Skip empty values
+      if (!value || value.toString().trim() === '') continue;
+
+      const propertyRowEl = propertiesEl.createDiv('property-row');
+      //propertyRowEl.createDiv('property-label', { text: name });
+      //propertyRowEl.createDiv('property-value', { text: value.toString() });
+    }
+
+    // Refresh button
+    const buttonContainer = dashboardEl.createDiv('dashboard-actions');
+    const refreshBtn = buttonContainer.createEl('button', { text: 'Next Task' });
+    refreshBtn.addEventListener('click', () => {
+      this.onDataUpdated();
+    });
+  }
 }
