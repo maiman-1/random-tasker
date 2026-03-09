@@ -1,21 +1,25 @@
 import {App, Editor, MarkdownView, Modal, 
 	Notice, Plugin, BasesView, QueryController, 
 	HoverParent, HoverPopover, parsePropertyId, Keymap } from 'obsidian';
-import {DEFAULT_SETTINGS, RandomTaskerSettings, SampleSettingTab} from "./settings";
+import {DEFAULT_SETTINGS, RandomTaskerSettings, RandomTaskerSettingsTab} from "./settings";
 export const ExampleViewType = 'example-view';
 
 // Remember to rename these classes and interfaces!
+
 
 export default class RandomTasker extends Plugin {
 	settings: RandomTaskerSettings;
 
 	async onload() {
 		// Tell Obsidian about the new view type that this plugin provides.
+    await this.loadSettings();
+    this.addSettingTab(new RandomTaskerSettingsTab(this.app, this));
+
 		this.registerBasesView(ExampleViewType, {
 			name: 'Random-Tasker',
 			icon: 'lucide-graduation-cap',
 			factory: (controller, containerEl) => {
-				return new MyBasesView(controller, containerEl)
+				return new RandomTaskerView(controller, containerEl)
 			},
 			options: () => ([
 				{
@@ -58,7 +62,7 @@ class SampleModal extends Modal {
 }
 
 
-export class MyBasesView extends BasesView implements HoverParent {
+export class RandomTaskerView extends BasesView implements HoverParent {
 
 	hoverPopover: HoverPopover | null;
 
@@ -87,6 +91,8 @@ export class MyBasesView extends BasesView implements HoverParent {
     const allEntries: any[] = [];
     const configuredFilePath = String((this.config as any).get?.('filePath') ?? 'TaskList/').trim();
     const filePath = configuredFilePath.length > 0 ? configuredFilePath : 'TaskList/';
+
+    //console.log(configuredFilePath);
 
     //console.log(this.data);
     for (const group of this.data.groupedData) {
@@ -140,9 +146,12 @@ export class MyBasesView extends BasesView implements HoverParent {
 
     // Properties display section
     const propertiesEl = dashboardEl.createDiv('dashboard-properties');
-    
+
+    //console.log(order);
     for (const propertyName of order) {
+      //console.log(propertyName);
       const { type, name } = parsePropertyId(propertyName);
+      //console.log(type, name);
       
       // Skip the file name property since we already displayed it as title
       if (name === 'name' && type === 'file') continue;
@@ -151,6 +160,7 @@ export class MyBasesView extends BasesView implements HoverParent {
       
       // Skip empty values
       if (!value || value.toString().trim() === '') continue;
+      //console.log(name, value.data);
 
       const propertyRowEl = propertiesEl.createDiv('property-row');
       //propertyRowEl.createDiv('property-label', { text: name });

@@ -2,14 +2,14 @@ import {App, PluginSettingTab, Setting} from "obsidian";
 import MyPlugin from "./main";
 
 export interface RandomTaskerSettings {
-	mySetting: string;
+	TaskFolder: string;
 }
 
 export const DEFAULT_SETTINGS: RandomTaskerSettings = {
-	mySetting: 'default'
+	TaskFolder: 'TaskList/'
 }
 
-export class SampleSettingTab extends PluginSettingTab {
+export class RandomTaskerSettingsTab extends PluginSettingTab {
 	plugin: MyPlugin;
 
 	constructor(app: App, plugin: MyPlugin) {
@@ -23,13 +23,13 @@ export class SampleSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc('It\'s a secret')
+			.setName('Task Folder Name')
+			.setDesc('Enter the name of the folder containing your tasks')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
+				.setPlaceholder('Enter task folder name')
+				.setValue(this.plugin.settings.TaskFolder)
 				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.TaskFolder = value;
 					await this.plugin.saveSettings();
 				}));
 	}
