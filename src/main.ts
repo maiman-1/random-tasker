@@ -2,6 +2,10 @@ import { Plugin, BasesView, QueryController,
 	HoverParent, HoverPopover, parsePropertyId, Keymap,
   BasesEntry } from 'obsidian';
 import {DEFAULT_SETTINGS, RandomTaskerSettings, RandomTaskerSettingsTab} from "./settings";
+
+//save states
+import { RandomTaskerState } from "./taskState";
+
 export const ExampleViewType = 'example-view';
 
 // Remember to rename these classes and interfaces!
@@ -9,17 +13,19 @@ export const ExampleViewType = 'example-view';
 
 export default class RandomTasker extends Plugin {
 	settings: RandomTaskerSettings;
+  taskState: RandomTaskerState;
 
 	async onload() {
 		// Tell Obsidian about the new view type that this plugin provides.
     await this.loadSettings();
+    await this.loadState();
     this.addSettingTab(new RandomTaskerSettingsTab(this.app, this));
 
 		this.registerBasesView(ExampleViewType, {
 			name: 'Random-Tasker',
 			icon: 'lucide-graduation-cap',
 			factory: (controller, containerEl) => {
-				return new RandomTaskerView(controller, containerEl)
+				return new RandomTaskerView(this, controller, containerEl)
 			},
 			options: () => ([
 				{
@@ -43,6 +49,18 @@ export default class RandomTasker extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
+  async loadState() {
+    this.taskState = Object.assign({}, {
+        currentTaskName: null,
+        currentTaskPath: null
+      }, 
+      await this.loadData() as Partial<RandomTaskerState>);
+  }
+
+  async saveState() {
+    await this.saveData(this.taskState);
+  }
 }
 
 
@@ -50,13 +68,17 @@ export default class RandomTasker extends Plugin {
 export class RandomTaskerView extends BasesView implements HoverParent {
 
 	hoverPopover: HoverPopover | null;
+
+  //TODO: Store current task in data.json instead of recalculating every time
 	currentTask: BasesEntry | null;
+  plugin: RandomTasker;
 
 	readonly type = ExampleViewType;
 	private containerEl: HTMLElement;
 
-	constructor(controller: QueryController, parentEl: HTMLElement) {
+	constructor(plugin: RandomTasker, controller: QueryController, parentEl: HTMLElement) {
 		super(controller);
+    this.plugin = plugin;
 		this.containerEl = parentEl.createDiv('bases-example-view-container');
 	}
 
@@ -84,7 +106,8 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     
     // Set the title (use file name)
     //console.log(randomTask);
-    const fileName = String(this.currentTask?.file.basename);
+    const fileName = this.plugin.taskState.currentTaskName;
+
     const linkEl = titleEl.createEl('a', { text: fileName ?? 'No tasks found', href: '#' });
     linkEl.onClickEvent((evt) => {
       if (evt.button !== 0 && evt.button !== 1) return;
@@ -130,17 +153,22 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     // Refresh button
     const buttonContainer = dashboardEl.createDiv('dashboard-actions');
     const refreshBtn = buttonContainer.createEl('button', { text: 'Next task' });
-    refreshBtn.addEventListener('click', () => {
-      this.getRandomTask();
+
+    // When the button is clicked, get a new random task and update the display
+    let awaitTaskPromise: Promise<boolean> | null = null;
+
+    refreshBtn.addEventListener('click', async () => {
+      await awaitTaskPromise = this.getRandomTask();
       this.onDataUpdated();
     });
   }
 
-  private getRandomTask(): BasesEntry | null {
+  private async getRandomTask(): Promise<boolean> {
 
     // Collect all entries from all groups
     const AllEntries: BasesEntry[] = [];
-    const configuredFilePath = (this.config.get('filePath') as string | null)?.trim() ?? 'TaskList/';
+    //TODO: use this.settings insetaead of this.config.get, and save to data.json instead of settings.json  
+    const configuredFilePath = this.plugin.settings.TaskFolder;
     const filePath = configuredFilePath.length > 0 ? configuredFilePath : 'TaskList/';
 
     //console.log(configuredFilePath);
@@ -158,14 +186,19 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 
     // If no entries, show a message
     if (AllEntries.length === 0) {
-      return null;
+      return false;
     }
 
     // Select a random task
     const randomTask =
       AllEntries[Math.floor(Math.random() * AllEntries.length)]!;
 
+    // Update the current task state
     this.currentTask = randomTask;
-    return randomTask;
+    this.plugin.taskState.currentTaskPath = randomTask.file.path;
+    this.plugin.taskState.currentTaskName = randomTask.file.name;
+    await this.plugin.saveState();
+
+    return true;
   }
 }
