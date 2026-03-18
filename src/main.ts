@@ -74,7 +74,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 
     // Collect all entries from all groups
     const allEntries: BasesEntry[] = [];
-    const configuredFilePath = String((this.config as any).get?.('filePath') ?? 'TaskList/').trim();
+    const configuredFilePath = (this.config.get('filePath') as string | null)?.trim() ?? 'TaskList/';
     const filePath = configuredFilePath.length > 0 ? configuredFilePath : 'TaskList/';
 
     //console.log(configuredFilePath);
