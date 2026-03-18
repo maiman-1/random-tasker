@@ -23,7 +23,7 @@ export class RandomTaskerSettingsTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Task Folder Name')
+			.setName('Task folder name')
 			.setDesc('Enter the name of the folder containing your tasks')
 			.addText(text => text
 				.setPlaceholder('Enter task folder name')

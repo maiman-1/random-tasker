@@ -1,6 +1,6 @@
 import { Plugin, BasesView, QueryController, 
 	HoverParent, HoverPopover, parsePropertyId, Keymap,
-  BasesEntry, BasesViewConfig } from 'obsidian';
+  BasesEntry } from 'obsidian';
 import {DEFAULT_SETTINGS, RandomTaskerSettings, RandomTaskerSettingsTab} from "./settings";
 export const ExampleViewType = 'example-view';
 
@@ -98,7 +98,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     }
 
     // Select a random task
-    const randomTask = allEntries[Math.floor(Math.random() * allEntries.length)];
+    const randomTask = allEntries[Math.floor(Math.random() * allEntries.length)]!;
 
     // Create dashboard container
     const dashboardEl = this.containerEl.createDiv('weekly-task-dashboard');
@@ -154,7 +154,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 
     // Refresh button
     const buttonContainer = dashboardEl.createDiv('dashboard-actions');
-    const refreshBtn = buttonContainer.createEl('button', { text: 'Next Task' });
+    const refreshBtn = buttonContainer.createEl('button', { text: 'Next task' });
     refreshBtn.addEventListener('click', () => {
       this.onDataUpdated();
     });
