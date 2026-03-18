@@ -73,35 +73,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     // Clear entries created by previous iterations.
     this.containerEl.empty();
 
-    // Collect all entries from all groups
-    const AllEntries: BasesEntry[] = [];
-    const configuredFilePath = (this.config.get('filePath') as string | null)?.trim() ?? 'TaskList/';
-    const filePath = configuredFilePath.length > 0 ? configuredFilePath : 'TaskList/';
-
-    //console.log(configuredFilePath);
-
-    //console.log(this.data);
-    for (const group of this.data.groupedData) {
-      //console.log(group);
-      for (const entry of group.entries) {
-        if (entry.file.path.startsWith(filePath)) {
-          //console.log(entry);
-          AllEntries.push(entry);
-        }
-      }
-    }
-
-    // If no entries, show a message
-    if (AllEntries.length === 0) {
-      this.containerEl.createEl('p', { text: 'No tasks available' });
-      return;
-    }
-
-    // Select a random task
-    const randomTask =
-      AllEntries[Math.floor(Math.random() * AllEntries.length)]!;
-
-    this.currentTask = randomTask;
+    
 
     // Create dashboard container
     const dashboardEl = this.containerEl.createDiv('weekly-task-dashboard');
@@ -112,8 +84,8 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     
     // Set the title (use file name)
     //console.log(randomTask);
-    const fileName = String(this.currentTask.file.basename);
-    const linkEl = titleEl.createEl('a', { text: fileName });
+    const fileName = String(this.currentTask?.file.basename);
+    const linkEl = titleEl.createEl('a', { text: fileName ?? 'No tasks found', href: '#' });
     linkEl.onClickEvent((evt) => {
       if (evt.button !== 0 && evt.button !== 1) return;
       evt.preventDefault();
@@ -144,7 +116,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       // Skip the file name property since we already displayed it as title
       if (name === 'name' && type === 'file') continue;
 
-      const value = randomTask.getValue(propertyName);
+      const value = this.currentTask?.getValue(propertyName);
       
       // Skip empty values
       if (!value || value.toString().trim() === '') continue;
@@ -159,7 +131,41 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     const buttonContainer = dashboardEl.createDiv('dashboard-actions');
     const refreshBtn = buttonContainer.createEl('button', { text: 'Next task' });
     refreshBtn.addEventListener('click', () => {
+      this.getRandomTask();
       this.onDataUpdated();
     });
+  }
+
+  private getRandomTask(): BasesEntry | null {
+
+    // Collect all entries from all groups
+    const AllEntries: BasesEntry[] = [];
+    const configuredFilePath = (this.config.get('filePath') as string | null)?.trim() ?? 'TaskList/';
+    const filePath = configuredFilePath.length > 0 ? configuredFilePath : 'TaskList/';
+
+    //console.log(configuredFilePath);
+
+    //console.log(this.data);
+    for (const group of this.data.groupedData) {
+      //console.log(group);
+      for (const entry of group.entries) {
+        if (entry.file.path.startsWith(filePath)) {
+          //console.log(entry);
+          AllEntries.push(entry);
+        }
+      }
+    }
+
+    // If no entries, show a message
+    if (AllEntries.length === 0) {
+      return null;
+    }
+
+    // Select a random task
+    const randomTask =
+      AllEntries[Math.floor(Math.random() * AllEntries.length)]!;
+
+    this.currentTask = randomTask;
+    return randomTask;
   }
 }
