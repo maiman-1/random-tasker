@@ -158,24 +158,21 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     const refreshBtn = buttonContainer.createEl('button', { text: 'Next task' });
 
     // When the button is clicked, get a new random task and update the display
-    let awaitTaskPromise: Promise<boolean> | null = null;
+    //let awaitTaskPromise: Promise<boolean> | null = null;
 
     refreshBtn.addEventListener('click', () => {
       void (
         async () => {
           console.debug('Refresh button clicked');
-          awaitTaskPromise = this.getRandomTask();
-          await awaitTaskPromise.then(
-              (success) => {
-                console.debug('Random task updated:', this.plugin.taskState.currentTaskName);
-                if (!success) {
-                  new Notice('No tasks found in the specified folder!');
-                }
-              }
-          )
+          const result = await this.getRandomTask();
+          if (!result) {
+            new Notice('No tasks found in the specified folder!');
+            return;
+          }
           this.onDataUpdated();
         }
-      )
+      )();
+      
     });
   }
 
@@ -200,6 +197,8 @@ export class RandomTaskerView extends BasesView implements HoverParent {
         }
       }
     }
+
+    //console.debug(`Found ${AllEntries.length} tasks in folder "${filePath}"`);
 
     // If no entries, show a message
     if (AllEntries.length === 0) {
