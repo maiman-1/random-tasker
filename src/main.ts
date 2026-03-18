@@ -1,5 +1,4 @@
-import {App, Editor, MarkdownView, Modal, 
-	Notice, Plugin, BasesView, QueryController, 
+import {App, Plugin, BasesView, QueryController, 
 	HoverParent, HoverPopover, parsePropertyId, Keymap } from 'obsidian';
 import {DEFAULT_SETTINGS, RandomTaskerSettings, RandomTaskerSettingsTab} from "./settings";
 export const ExampleViewType = 'example-view';
@@ -45,21 +44,6 @@ export default class RandomTasker extends Plugin {
 	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		let {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
-}
 
 
 export class RandomTaskerView extends BasesView implements HoverParent {
