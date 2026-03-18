@@ -1,5 +1,6 @@
-import {App, Plugin, BasesView, QueryController, 
-	HoverParent, HoverPopover, parsePropertyId, Keymap } from 'obsidian';
+import { Plugin, BasesView, QueryController, 
+	HoverParent, HoverPopover, parsePropertyId, Keymap,
+  BasesEntry, BasesViewConfig } from 'obsidian';
 import {DEFAULT_SETTINGS, RandomTaskerSettings, RandomTaskerSettingsTab} from "./settings";
 export const ExampleViewType = 'example-view';
 
@@ -72,7 +73,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     this.containerEl.empty();
 
     // Collect all entries from all groups
-    const allEntries: any[] = [];
+    const allEntries: BasesEntry[] = [];
     const configuredFilePath = String((this.config as any).get?.('filePath') ?? 'TaskList/').trim();
     const filePath = configuredFilePath.length > 0 ? configuredFilePath : 'TaskList/';
 
