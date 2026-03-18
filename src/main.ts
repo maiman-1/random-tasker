@@ -50,6 +50,7 @@ export default class RandomTasker extends Plugin {
 export class RandomTaskerView extends BasesView implements HoverParent {
 
 	hoverPopover: HoverPopover | null;
+	currentTask: BasesEntry | null;
 
 	readonly type = ExampleViewType;
 	private containerEl: HTMLElement;
@@ -73,7 +74,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     this.containerEl.empty();
 
     // Collect all entries from all groups
-    const allEntries: BasesEntry[] = [];
+    const AllEntries: BasesEntry[] = [];
     const configuredFilePath = (this.config.get('filePath') as string | null)?.trim() ?? 'TaskList/';
     const filePath = configuredFilePath.length > 0 ? configuredFilePath : 'TaskList/';
 
@@ -85,20 +86,22 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       for (const entry of group.entries) {
         if (entry.file.path.startsWith(filePath)) {
           //console.log(entry);
-          allEntries.push(entry);
+          AllEntries.push(entry);
         }
       }
-      //allEntries.push(...group.entries);
     }
 
     // If no entries, show a message
-    if (allEntries.length === 0) {
+    if (AllEntries.length === 0) {
       this.containerEl.createEl('p', { text: 'No tasks available' });
       return;
     }
 
     // Select a random task
-    const randomTask = allEntries[Math.floor(Math.random() * allEntries.length)]!;
+    const randomTask =
+      AllEntries[Math.floor(Math.random() * AllEntries.length)]!;
+
+    this.currentTask = randomTask;
 
     // Create dashboard container
     const dashboardEl = this.containerEl.createDiv('weekly-task-dashboard');
@@ -109,12 +112,12 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     
     // Set the title (use file name)
     //console.log(randomTask);
-    const fileName = String(randomTask.file.basename);
+    const fileName = String(this.currentTask.file.basename);
     const linkEl = titleEl.createEl('a', { text: fileName });
     linkEl.onClickEvent((evt) => {
       if (evt.button !== 0 && evt.button !== 1) return;
       evt.preventDefault();
-      const path = randomTask.file.path;
+      const path = this.currentTask?.file.path ?? '';
       const modEvent = Keymap.isModEvent(evt);
       void app.workspace.openLinkText(path, '', modEvent);
     });
@@ -125,7 +128,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
         source: 'bases',
         hoverParent: this,
         targetEl: linkEl,
-        linktext: randomTask.file.path,
+        linktext: this.currentTask?.file.path ?? '',
       });
     });
 
