@@ -1,6 +1,7 @@
 import { Plugin, BasesView, QueryController, 
 	HoverParent, HoverPopover, parsePropertyId, Keymap,
-  BasesEntry } from 'obsidian';
+  BasesEntry, 
+  Notice} from 'obsidian';
 import {DEFAULT_SETTINGS, RandomTaskerSettings, RandomTaskerSettingsTab} from "./settings";
 
 //save states
@@ -108,6 +109,8 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     //console.log(randomTask);
     const fileName = this.plugin.taskState.currentTaskName;
 
+    console.debug('Current task:', fileName);
+
     const linkEl = titleEl.createEl('a', { text: fileName ?? 'No tasks found', href: '#' });
     linkEl.onClickEvent((evt) => {
       if (evt.button !== 0 && evt.button !== 1) return;
@@ -157,17 +160,31 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     // When the button is clicked, get a new random task and update the display
     let awaitTaskPromise: Promise<boolean> | null = null;
 
-    refreshBtn.addEventListener('click', async () => {
-      await awaitTaskPromise = this.getRandomTask();
-      this.onDataUpdated();
+    refreshBtn.addEventListener('click', () => {
+      void (
+        async () => {
+          console.debug('Refresh button clicked');
+          awaitTaskPromise = this.getRandomTask();
+          await awaitTaskPromise.then(
+              (success) => {
+                console.debug('Random task updated:', this.plugin.taskState.currentTaskName);
+                if (!success) {
+                  new Notice('No tasks found in the specified folder!');
+                }
+              }
+          )
+          this.onDataUpdated();
+        }
+      )
     });
   }
 
   private async getRandomTask(): Promise<boolean> {
+    console.debug('Getting random task...');
 
     // Collect all entries from all groups
     const AllEntries: BasesEntry[] = [];
-    //TODO: use this.settings insetaead of this.config.get, and save to data.json instead of settings.json  
+    
     const configuredFilePath = this.plugin.settings.TaskFolder;
     const filePath = configuredFilePath.length > 0 ? configuredFilePath : 'TaskList/';
 
