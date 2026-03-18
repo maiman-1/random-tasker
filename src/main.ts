@@ -70,7 +70,6 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 
 	hoverPopover: HoverPopover | null;
 
-  //TODO: Store current task in data.json instead of recalculating every time
 	currentTask: BasesEntry | null;
   plugin: RandomTasker;
 
@@ -115,7 +114,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     linkEl.onClickEvent((evt) => {
       if (evt.button !== 0 && evt.button !== 1) return;
       evt.preventDefault();
-      const path = this.currentTask?.file.path ?? '';
+      const path = this.plugin.taskState.currentTaskPath ?? '';
       const modEvent = Keymap.isModEvent(evt);
       void app.workspace.openLinkText(path, '', modEvent);
     });
@@ -126,7 +125,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
         source: 'bases',
         hoverParent: this,
         targetEl: linkEl,
-        linktext: this.currentTask?.file.path ?? '',
+        linktext: this.plugin.taskState.currentTaskPath ?? '',
       });
     });
 
@@ -142,6 +141,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       // Skip the file name property since we already displayed it as title
       if (name === 'name' && type === 'file') continue;
 
+      //TODO: get the task file and extract the property value from the file's frontmatter or content based on the property type and name
       const value = this.currentTask?.getValue(propertyName);
       
       // Skip empty values
@@ -155,7 +155,12 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 
     // Refresh button
     const buttonContainer = dashboardEl.createDiv('dashboard-actions');
+
+    //TODO: this buttons only show when there is no task found.
     const refreshBtn = buttonContainer.createEl('button', { text: 'Next task' });
+    //TODO: 2 buttons: "Complete Task" and "Fail Task".
+    // Complete task will get a task and a reward from reward file, and mark the current task as completed (e.g. by moving it to a "Completed" folder or adding a "completed" tag).
+    // Fail task will get a task and a punishment from punishment file
 
     // When the button is clicked, get a new random task and update the display
     //let awaitTaskPromise: Promise<boolean> | null = null;
