@@ -2,8 +2,9 @@ import { Plugin, BasesView, QueryController,
 	HoverParent, HoverPopover, parsePropertyId, Keymap,
   BasesEntry, 
   Notice,
-  Vault,
-  TFile} from 'obsidian';
+  MarkdownRenderer,
+  TFile,
+  Component} from 'obsidian';
 import {DEFAULT_SETTINGS, RandomTaskerSettings, RandomTaskerSettingsTab} from "./settings";
 
 //save states
@@ -135,12 +136,16 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     const propertiesEl = dashboardEl.createDiv('dashboard-properties');
 
     //TODO: get the task file and extract the property value from the file's frontmatter or content based on the property type and name
+    const component = new Component();
     const taskFile = this.plugin.app.vault.getAbstractFileByPath(this.plugin.taskState.currentTaskPath ?? '');
-    console.debug('Task file:', taskFile);
+
+    //console.debug('Task file:', taskFile);
+
     if (taskFile instanceof TFile) {
       void this.plugin.app.vault.cachedRead(taskFile).then((fileText) => {
         console.debug('Task file contents:', fileText);
-        propertiesEl.createEl('pre', { text: fileText });
+        //propertiesEl.createEl('pre', { text: fileText });
+        void MarkdownRenderer.render(this.app, fileText, propertiesEl,taskFile.path, component);
       });
     }
     //const value = this.currentTask?.getValue(propertyName);
@@ -149,7 +154,63 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     const buttonContainer = dashboardEl.createDiv('dashboard-actions');
 
     //TODO: this buttons only show when there is no task found.
-    const refreshBtn = buttonContainer.createEl('button', { text: 'Next task' });
+    let refreshBtn;
+    let failBtn;
+    let CompleteBtn;
+    if (!fileName) {
+      refreshBtn = buttonContainer.createEl('button', { text: 'Next task', cls: 'neutral-event' });
+
+      refreshBtn.addEventListener('click', () => {
+        void (
+          async () => {
+            console.debug('Refresh button clicked');
+            const result = await this.getRandomTask();
+            if (!result) {
+              new Notice('No tasks found in the specified folder!');
+              return;
+            }
+            this.onDataUpdated();
+          }
+        )();
+      
+      });
+    }else {
+      
+      failBtn = buttonContainer.createEl('button', { text: 'Fail task', cls: 'bad-event' });
+      CompleteBtn = buttonContainer.createEl('button', { text: 'Complete task', cls: 'good-event' });
+
+      CompleteBtn.addEventListener('click', () => {
+        void (
+          async () => {
+            console.debug('Complete button clicked');
+            const result = await this.getRandomTask();
+            if (!result) {
+              new Notice('No tasks found in the specified folder!');
+              return;
+            }
+            this.onDataUpdated();
+          }
+        )();
+      
+      });
+
+      failBtn.addEventListener('click', () => {
+        void (
+          async () => {
+            console.debug('Fail button clicked');
+            const result = await this.getRandomTask();
+            if (!result) {
+              new Notice('No tasks found in the specified folder!');
+              return;
+            }
+            this.onDataUpdated();
+          }
+        )();
+      
+      });
+    }
+    
+
     //TODO: 2 buttons: "Complete Task" and "Fail Task".
     // Complete task will get a task and a reward from reward file, and mark the current task as completed (e.g. by moving it to a "Completed" folder or adding a "completed" tag).
     // Fail task will get a task and a punishment from punishment file
@@ -157,20 +218,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     // When the button is clicked, get a new random task and update the display
     //let awaitTaskPromise: Promise<boolean> | null = null;
 
-    refreshBtn.addEventListener('click', () => {
-      void (
-        async () => {
-          console.debug('Refresh button clicked');
-          const result = await this.getRandomTask();
-          if (!result) {
-            new Notice('No tasks found in the specified folder!');
-            return;
-          }
-          this.onDataUpdated();
-        }
-      )();
-      
-    });
+    
 
     
   }

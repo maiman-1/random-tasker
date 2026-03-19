@@ -7,6 +7,36 @@ If your plugin does not need CSS, delete this file.
 
 */
 
+
+
+.good-event {
+  background-color: var(--color-green);
+  color: var(--text-on-green);
+}
+
+.good-event:hover {
+  background-color: var(--color-green-hover);
+}
+
+.bad-event {
+  background-color: var(--color-red);
+  color: var(--text-on-red);
+}
+
+.bad-event:hover {
+  background-color: var(--color-red-hover);
+}
+
+.neutral-event {
+  background-color: var(--color-accent);
+  color: var(--text-on-accent);
+}
+
+.neutral-event:hover {
+  background-color: var(--color-accent-hover);
+}
+
+
 .weekly-task-dashboard {
   padding: 2rem;
   max-width: 600px;
@@ -69,8 +99,8 @@ If your plugin does not need CSS, delete this file.
 
 .dashboard-actions button {
   padding: 0.75rem 1.5rem;
-  background-color: var(--color-accent);
-  color: var(--text-on-accent);
+  /*background-color: var(--color-accent);*/
+  /*color: var(--text-on-accent);*/
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -86,3 +116,4 @@ If your plugin does not need CSS, delete this file.
 .dashboard-actions button:active {
   opacity: 0.6;
 }
+
