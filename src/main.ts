@@ -92,7 +92,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 	const { app } = this;
 
     // Retrieve the user configured order set in the Properties menu.
-    const order = this.config.getOrder();
+    //const order = this.config.getOrder();
 
     // Clear entries created by previous iterations.
     this.containerEl.empty();
@@ -137,7 +137,12 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     //TODO: get the task file and extract the property value from the file's frontmatter or content based on the property type and name
     const taskFile = this.plugin.app.vault.getAbstractFileByPath(this.plugin.taskState.currentTaskPath ?? '');
     console.debug('Task file:', taskFile);
-    //console.debug(Vault.cachedRead(taskFile as TFile))
+    if (taskFile instanceof TFile) {
+      void this.plugin.app.vault.cachedRead(taskFile).then((fileText) => {
+        console.debug('Task file contents:', fileText);
+        propertiesEl.createEl('pre', { text: fileText });
+      });
+    }
     //const value = this.currentTask?.getValue(propertyName);
 
     // Refresh button
