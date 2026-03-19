@@ -1,7 +1,9 @@
 import { Plugin, BasesView, QueryController, 
 	HoverParent, HoverPopover, parsePropertyId, Keymap,
   BasesEntry, 
-  Notice} from 'obsidian';
+  Notice,
+  Vault,
+  TFile} from 'obsidian';
 import {DEFAULT_SETTINGS, RandomTaskerSettings, RandomTaskerSettingsTab} from "./settings";
 
 //save states
@@ -132,26 +134,11 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     // Properties display section
     const propertiesEl = dashboardEl.createDiv('dashboard-properties');
 
-    //console.log(order);
-    for (const propertyName of order) {
-      //console.log(propertyName);
-      const { type, name } = parsePropertyId(propertyName);
-      //console.log(type, name);
-      
-      // Skip the file name property since we already displayed it as title
-      if (name === 'name' && type === 'file') continue;
-
-      //TODO: get the task file and extract the property value from the file's frontmatter or content based on the property type and name
-      const value = this.currentTask?.getValue(propertyName);
-      
-      // Skip empty values
-      if (!value || value.toString().trim() === '') continue;
-      //console.log(name, value.data);
-
-      const propertyRowEl = propertiesEl.createDiv('property-row');
-      //propertyRowEl.createDiv('property-label', { text: name });
-      //propertyRowEl.createDiv('property-value', { text: value.toString() });
-    }
+    //TODO: get the task file and extract the property value from the file's frontmatter or content based on the property type and name
+    const taskFile = this.plugin.app.vault.getAbstractFileByPath(this.plugin.taskState.currentTaskPath ?? '');
+    console.debug('Task file:', taskFile);
+    //console.debug(Vault.cachedRead(taskFile as TFile))
+    //const value = this.currentTask?.getValue(propertyName);
 
     // Refresh button
     const buttonContainer = dashboardEl.createDiv('dashboard-actions');
@@ -179,6 +166,8 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       )();
       
     });
+
+    
   }
 
   private async getRandomTask(): Promise<boolean> {
