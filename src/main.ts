@@ -10,7 +10,7 @@ import {DEFAULT_SETTINGS, RandomTaskerSettings, RandomTaskerSettingsTab} from ".
 //save states
 import { RandomTaskerState } from "./taskState";
 
-export const ExampleViewType = 'example-view';
+export const randomTaskerView = 'random-tasker-view';
 
 // Remember to rename these classes and interfaces!
 
@@ -25,7 +25,7 @@ export default class RandomTasker extends Plugin {
     await this.loadState();
     this.addSettingTab(new RandomTaskerSettingsTab(this.app, this));
 
-		this.registerBasesView(ExampleViewType, {
+		this.registerBasesView(randomTaskerView, {
 			name: 'Random-Tasker',
 			icon: 'lucide-graduation-cap',
 			factory: (controller, containerEl) => {
@@ -57,7 +57,9 @@ export default class RandomTasker extends Plugin {
   async loadState() {
     this.taskState = Object.assign({}, {
         currentTaskName: null,
-        currentTaskPath: null
+        currentTaskPath: null,
+        savedRewards: [],
+        
       }, 
       await this.loadData() as Partial<RandomTaskerState>);
   }
@@ -76,7 +78,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 	currentTask: BasesEntry | null;
   plugin: RandomTasker;
 
-	readonly type = ExampleViewType;
+	readonly type = randomTaskerView;
 	private containerEl: HTMLElement;
 
 	constructor(plugin: RandomTasker, controller: QueryController, parentEl: HTMLElement) {
@@ -153,7 +155,12 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     // Refresh button
     const buttonContainer = dashboardEl.createDiv('dashboard-actions');
 
-    //TODO: this buttons only show when there is no task found.
+    // Complete task will get a task and a reward from reward file, and mark the current task as completed (e.g. by moving it to a "Completed" folder or adding a "completed" tag).
+    // Fail task will get a task and a punishment from punishment file
+
+    // When the button is clicked, get a new random task and update the display
+    //let awaitTaskPromise: Promise<boolean> | null = null;
+
     let refreshBtn;
     let failBtn;
     let CompleteBtn;
@@ -209,17 +216,6 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       
       });
     }
-    
-
-    //TODO: 2 buttons: "Complete Task" and "Fail Task".
-    // Complete task will get a task and a reward from reward file, and mark the current task as completed (e.g. by moving it to a "Completed" folder or adding a "completed" tag).
-    // Fail task will get a task and a punishment from punishment file
-
-    // When the button is clicked, get a new random task and update the display
-    //let awaitTaskPromise: Promise<boolean> | null = null;
-
-    
-
     
   }
 
