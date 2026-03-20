@@ -137,8 +137,26 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     //display reward
     const rewardsEl = dashboardEl.createDiv('reward-display');
     if (this.plugin.taskState.savedRewards && this.plugin.taskState.savedRewards.length > 0) {
-      const latestReward = this.plugin.taskState.savedRewards[this.plugin.taskState.savedRewards.length - 1];
-      rewardsEl.createEl('span', { text: `Latest reward: ${latestReward}`, cls: 'reward-text' });
+      //structure into a table
+      const tableEl = rewardsEl.createEl('table', { cls: 'reward-table' });
+      const tbodyEl = tableEl.createEl('tbody');
+      //each row has one reward and a button to remove the reward from the list
+      //removal is on reward fulfilled or when user clicks the button to remove it
+      this.plugin.taskState.savedRewards.forEach((reward) => {
+        const rowEl = tbodyEl.createEl('tr');
+        rowEl.createEl('td', { text: reward, cls: 'reward-cell' });
+        rowEl.createEl('td').createEl('button', { text: 'Remove', cls: 'remove-reward-btn' }).addEventListener('click', async () => {
+          this.plugin.taskState.savedRewards = this.plugin.taskState.savedRewards?.filter((r) => r !== reward);
+          void (
+              async () => {
+                await this.plugin.saveSettings();
+              } 
+          )
+          this.displayDashboard();
+        });
+      });
+    } else {
+      rewardsEl.createEl('span', { text: 'No rewards yet. Complete a task to earn rewards!', cls: 'reward-text' });
     }
 
     // Properties display section
@@ -317,7 +335,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
 
     // save reward to state for display
-    this.plugin.taskState.savedRewards?.push(randomReward);
+    this.plugin.taskState.savedRewards?.push(randomReward ?? '');
     await this.plugin.saveState();
 
     //call roll task to get a new task after rolling a reward
