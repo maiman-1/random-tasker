@@ -14,7 +14,7 @@ If your plugin does not need CSS, delete this file.
 
 .dashboard-header {
   margin-bottom: 2rem;
-  border-bottom: 2px solid var(--accent-h);
+  border-bottom: 2px solid var(--color-base-100);
   padding-bottom: 1rem;
 }
 
@@ -25,7 +25,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 .task-title a {
-  color: var(--accent-h);
+  color: var(--color-base-100);
   text-decoration: none;
 }
 
@@ -35,15 +35,15 @@ If your plugin does not need CSS, delete this file.
 
 .reward-display, .punishment-display {
   margin-bottom: 2rem;
-  border-bottom: 2px solid var(--accent-s);
+  border-bottom: 2px solid var(--color-accent)
 }
 
-.reward-display .reward-header {
+.reward-display, .reward-header {
   margin-bottom: 1rem;
   color: var(--color-accent);
 }
 
-.punishment-display .punishment-header {
+.punishment-display, .punishment-header {
   margin-bottom: 1rem;
   color: var(--color-accent);
 }
@@ -53,13 +53,39 @@ If your plugin does not need CSS, delete this file.
   width: 100%;
   font-size: 0.95em;
   box-sizing: content-box;
+  border-collapse: collapse;
 }
 
-.reward-table, .punishment-table tr {
+.reward-table tr, .punishment-table tr {
   text-align: left;
   padding: 6px 10px;
-  border-bottom: 1px solid var(--background-secondary);
+  margin: 0.5 rem;
+  color: var(--text-normal)
 }
+
+.reward-table tr:not(:last-child) td, 
+.punishment-table tr:not(:last-child) td {
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.reward-table .remove-reward-btn,
+.punishment-table .remove-punishment-btn {
+  background: var(--interactive-normal);
+  border: none;
+  color: var(--color-red);
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.reward-table .remove-reward-btn:hover,
+.punishment-table .remove-punishment-btn:hover {
+  background: var(--interactive-hover);
+  border: none;
+  color: var(--color-red);
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
 
 
 .dashboard-properties {
