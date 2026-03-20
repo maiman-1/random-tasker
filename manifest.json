@@ -3,8 +3,8 @@
 	"name": "Random Tasker",
 	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "This plugin is designed for goal systems, habit challenges, or “life tasker” setups where you want a surprise objective instead of choosing one manually..",
+	"description": "Randomly assign yourself a random task, reward yourself on completion and punish yourself on failure.",
 	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
+	"authorUrl": "https://maiman-1.github.io/astro-blog",
 	"isDesktopOnly": true
 }
