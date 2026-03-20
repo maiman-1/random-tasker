@@ -8,9 +8,9 @@ export interface RandomTaskerSettings {
 }
 
 export const DEFAULT_SETTINGS: RandomTaskerSettings = {
-	TaskFolder: 'TaskList/',
-	rewardsFile: 'Rewards.md',
-	punishmentsFile: 'Punishments.md',
+	TaskFolder: 'TaskList',
+	rewardsFile: 'Rewards',
+	punishmentsFile: 'Punishments',
 }
 
 export class RandomTaskerSettingsTab extends PluginSettingTab {

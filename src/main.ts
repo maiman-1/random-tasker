@@ -59,7 +59,7 @@ export default class RandomTasker extends Plugin {
         currentTaskName: null,
         currentTaskPath: null,
         savedRewards: [],
-        
+        savedPunishments: [],
       }, 
       await this.loadData() as Partial<RandomTaskerState>);
   }
@@ -134,6 +134,13 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       });
     });
 
+    //display reward
+    const rewardsEl = dashboardEl.createDiv('reward-display');
+    if (this.plugin.taskState.savedRewards && this.plugin.taskState.savedRewards.length > 0) {
+      const latestReward = this.plugin.taskState.savedRewards[this.plugin.taskState.savedRewards.length - 1];
+      rewardsEl.createEl('span', { text: `Latest reward: ${latestReward}`, cls: 'reward-text' });
+    }
+
     // Properties display section
     const propertiesEl = dashboardEl.createDiv('dashboard-properties');
 
@@ -193,6 +200,12 @@ export class RandomTaskerView extends BasesView implements HoverParent {
             const result = await this.getRandomTask();
             if (!result) {
               new Notice('No tasks found in the specified folder!');
+              return;
+            }
+            const rewardResult = await this.rollReward();
+            if (!rewardResult) {
+              // If rolling a reward failed, we can choose to either stop here or continue to get a new task. For now, let's just show a notice and continue.
+              //new Notice('Failed to roll a reward. Please check your rewards file and settings.');
               return;
             }
             this.onDataUpdated();
@@ -259,5 +272,59 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     await this.plugin.saveState();
 
     return true;
+  }
+
+  private async rollReward(){
+    /*
+    Input; None
+    Output: Promise if a reward is able to be rolled
+
+    Steps:
+    1. Get the list of rewards from the rewards file specified in settings (if the file or list doesn't exist, return false)
+    2. Randomly select a reward from the list
+    3. add reward to state for display in the dashboard (this.taskState.savedRewards)
+    */
+
+    // get file path from settings
+    const configuredFilePath = this.plugin.settings.rewardsFile;
+    const filePath = configuredFilePath && configuredFilePath.length > 0 ? configuredFilePath : 'Rewards.md';
+
+    // add file extension if not present
+    const finalFilePath = filePath.endsWith('.md') ? filePath : `${filePath}.md`;
+
+    // get the rewards file
+    const rewardsFile = this.plugin.app.vault.getAbstractFileByPath(finalFilePath);
+
+    // if the file doesn't exist or isn't a TFile, return false
+    if (!(rewardsFile instanceof TFile)) {
+      new Notice('Rewards file not found! Please check your settings.');
+      return false;
+    }
+
+    // read file
+    const fileText = await this.plugin.app.vault.cachedRead(rewardsFile);
+
+    //extrac rewards from file (for simplicity, assume each reward is a line in the file)
+    const rewards = fileText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+
+    // edge case: no rewards in file
+    if (rewards.length === 0) {
+      new Notice('No rewards found in file! Please check your rewards file.');
+      return false;
+    }
+
+    // randomly select a reward
+    const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
+
+    // save reward to state for display
+    this.plugin.taskState.savedRewards?.push(randomReward);
+    await this.plugin.saveState();
+
+    //call roll task to get a new task after rolling a reward
+    // call this in event handler instead
+
+    //return true once completed
+    return true;
+
   }
 }
