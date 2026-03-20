@@ -136,6 +136,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 
     //display reward
     const rewardsEl = dashboardEl.createDiv('reward-display');
+    rewardsEl.createEl('h2', { text: 'Rewards', cls: 'reward-header' });
     if (this.plugin.taskState.savedRewards && this.plugin.taskState.savedRewards.length > 0) {
       //structure into a table
       const tableEl = rewardsEl.createEl('table', { cls: 'reward-table' });
@@ -145,7 +146,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       this.plugin.taskState.savedRewards.forEach((reward) => {
         const rowEl = tbodyEl.createEl('tr');
         rowEl.createEl('td', { text: reward, cls: 'reward-cell' });
-        rowEl.createEl('td').createEl('button', { text: 'Remove', cls: 'remove-reward-btn' }).addEventListener('click', () => {
+        rowEl.createEl('td').createEl('button', { text: '❌', cls: 'remove-reward-btn' }).addEventListener('click', () => {
           this.plugin.taskState.savedRewards = this.plugin.taskState.savedRewards?.filter((r) => r !== reward);
           void this.plugin.saveSettings();
           this.onDataUpdated();
@@ -155,8 +156,28 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       rewardsEl.createEl('span', { text: 'No rewards yet. Complete a task to earn rewards!', cls: 'reward-text' });
     }
 
+    //display punishment, similar structure to rewards
+    const punishmentsEl = dashboardEl.createDiv('punishment-display');
+    punishmentsEl.createEl('h2', { text: 'Punishments', cls: 'punishment-header' });
+    if (this.plugin.taskState.savedPunishments && this.plugin.taskState.savedPunishments.length > 0) {
+      const tableEl = punishmentsEl.createEl('table', { cls: 'punishment-table' });
+      const tbodyEl = tableEl.createEl('tbody');
+      this.plugin.taskState.savedPunishments.forEach((punishment) => {
+        const rowEl = tbodyEl.createEl('tr');
+        rowEl.createEl('td', { text: punishment, cls: 'punishment-cell' });
+        rowEl.createEl('td').createEl('button', { text: '❌', cls: 'remove-punishment-btn' }).addEventListener('click', () => {
+          this.plugin.taskState.savedPunishments = this.plugin.taskState.savedPunishments?.filter((p) => p !== punishment);
+          void this.plugin.saveSettings();
+          this.onDataUpdated();
+        });
+      });
+    } else {
+      punishmentsEl.createEl('span', { text: 'No punishments yet.', cls: 'punishment-text' });
+    }
+
     // Properties display section
     const propertiesEl = dashboardEl.createDiv('dashboard-properties');
+    propertiesEl.createEl('h2', { text: 'Task details', cls: 'properties-header' });
 
     //TODO: get the task file and extract the property value from the file's frontmatter or content based on the property type and name
     const component = new Component();
@@ -235,6 +256,12 @@ export class RandomTaskerView extends BasesView implements HoverParent {
             const result = await this.getRandomTask();
             if (!result) {
               new Notice('No tasks found in the specified folder!');
+              return;
+            }
+            const punishmentResult = await this.rollPunishment();
+            if (!punishmentResult) {
+              // If rolling a punishment failed, we can choose to either stop here or continue to get a new task. For now, let's just show a notice and continue.
+              //new Notice('Failed to roll a punishment. Please check your punishments file and settings.');
               return;
             }
             this.onDataUpdated();
@@ -340,5 +367,53 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     //return true once completed
     return true;
 
+  }
+
+
+  private async rollPunishment() {
+    /*
+    Input None
+    Output: Promise if a punishment is able to be rolled
+
+    Steps:
+    1. Get the list of punishments from the punishments file specified in settings (if the file or list doesn't exist, return false)
+    2. Randomly select a punishment from the list
+    3. add punishment to state for display in the dashboard (this.taskState.savedPunishments)
+    */
+
+    // get file path from settings
+    const configuredFilePath = this.plugin.settings.punishmentsFile;
+    const filePath = configuredFilePath && configuredFilePath.length > 0 ? configuredFilePath : 'Punishments.md';
+
+    // add file extension if not present
+    const finalFilePath = filePath.endsWith('.md') ? filePath : `${filePath}.md`;
+
+    // get the punishments file
+    const punishmentsFile = this.plugin.app.vault.getAbstractFileByPath(finalFilePath);
+    // if the file doesn't exist or isn't a TFile, return false
+    if (!(punishmentsFile instanceof TFile)) {
+      new Notice('Punishments file not found! Please check your settings.');
+      return false;
+    }
+
+    // read the file content
+    const fileText = await this.plugin.app.vault.read(punishmentsFile);
+    // extract punishments from file (for simplicity, assume each punishment is a line in the file)
+    const punishments = fileText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+
+    // edge case: no punishments in file
+    if (punishments.length === 0) {
+      new Notice('No punishments found in file! Please check your punishments file.');
+      return false;
+    }
+
+    // randomly select a punishment
+    const randomPunishment = punishments[Math.floor(Math.random() * punishments.length)];
+
+    // save punishment to state for display
+    this.plugin.taskState.savedPunishments?.push(randomPunishment ?? '');
+    await this.plugin.saveState();
+
+    return true;
   }
 }
