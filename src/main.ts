@@ -1,5 +1,5 @@
 import { Plugin, BasesView, QueryController, 
-	HoverParent, HoverPopover, parsePropertyId, Keymap,
+	HoverParent, HoverPopover, Keymap,
   BasesEntry, 
   Notice,
   MarkdownRenderer,
