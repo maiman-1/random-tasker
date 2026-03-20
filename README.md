@@ -1,90 +1,52 @@
-# Obsidian Sample Plugin
+# Random Tasker (Obsidian)
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Random Tasker turns your Obsidian workspace into a simple accountability dashboard that shows one random task at a time, lets you mark it as complete or failed, and keeps track of earned rewards and chosen punishments.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## What it does inside Obsidian
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+- **Bases view UI:** The plugin registers a `Random-Tasker` view via Obsidian's Bases plugin API. Open it from the Quick Switcher (search for _Random-Tasker_) or add it to a workspace pane to see your current task, reward/punishment lists, and task details rendered in-line.
+- **Random task selection:** It filters your Bases entries for files under the folder you specify in the settings (default `TaskList/`) and picks one at random each time you click **Next task**, **Complete task**, or **Fail task**.
+- **Reward/punishment tracker:** Rewards and punishments are drawn from Markdown files you configure (`Rewards.md` / `Punishments.md` by default). Completing or failing a task rolls a random entry, pushes it into the dashboard table, and persists it so the history survives reloads.
+- **Task metadata preview:** The current task file is rendered in the dashboard (via Obsidian’s `MarkdownRenderer`) so you can see properties or content without leaving the view.
+- **Quick removal:** Each reward or punishment row has a ❌ button that removes it from the list and immediately saves the updated state.
+- **Reusable state storage:** Settings and runtime state (current task, saved rewards/punishments) are persisted via `loadData` / `saveData`, so your dashboard resumes exactly where you left off after a restart.
 
-## First time developing plugins?
+## Using Random Tasker
 
-Quick starting guide for new plugin devs:
+1. **Install/enable the plugin**
+   - Copy `main.js`, `manifest.json`, and `styles.css` to `<Vault>/.obsidian/plugins/random-tasker/`.
+   - Enable the plugin in **Settings → Community plugins**.
+   - Open a Bases view, run the **Random-Tasker** view, or use **Ctrl+P → Switch to view** to show the dashboard.
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+2. **Feed it your tasks**
+   - Create a folder (default `TaskList/`) and add Markdown notes representing tasks.
+   - Optionally tag them with metadata or write properties—`Random Tasker` will render the content so you can glance at whatever you need.
 
-## Releasing new releases
+3. **Define rewards & punishments**
+   - Create `Rewards.md` and `Punishments.md` (paths configurable in settings).
+   - List one reward/punishment per line; the plugin trims blank lines and uses each line as an option.
+   - When you click **Complete task**, the plugin rolls a reward and adds it to the table. Clicking **Fail task** does the same for punishments.
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+4. **Interact with the dashboard**
+   - **Next task** (visible when no task is selected) fetches any random task from the configured folder.
+   - **Complete task** selects a random task, rolls a reward, and refreshes the dashboard.
+   - **Fail task** also picks a new task and rolls a punishment.
+   - Click the ❌ buttons in the reward or punishment tables to clear entries.
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+5. **Adjust settings**
+   - Open the plugin settings tab (via **Settings → Random Tasker**) to:
+     - Change the task folder path used for random selection.
+     - Point to alternate rewards/punishments files (with or without `.md` extension).
+     - Set any future options added to the settings tab.
 
-## Adding your plugin to the community plugin list
+## Development notes
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+- Run `npm install` once after cloning the repo.
+- Use `npm run dev` while developing to rebuild `main.js` automatically.
+- Run `npm run build` before packaging, and never commit generated `main.js`.
+- The plugin relies on Bases data, so ensure the Bases plugin is enabled and you have entries grouped by file path.
 
-## How to use
+## Help & inspiration
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
-
-If you have multiple URLs, you can also do:
-
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
-
-## API Documentation
-
-See https://docs.obsidian.md
+- Review Obsidian’s [developer documentation](https://docs.obsidian.md) for APIs like `saveData` or `registerBasesView`.
+- Copy the structure of `src/settings.ts` and `src/taskState.ts` when introducing new persisted fields.
