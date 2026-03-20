@@ -121,11 +121,11 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       evt.preventDefault();
       const path = this.plugin.taskState.currentTaskPath ?? '';
       const modEvent = Keymap.isModEvent(evt);
-      void app.workspace.openLinkText(path, '', modEvent);
+      void this.plugin.app.workspace.openLinkText(path, '', modEvent);
     });
 
     linkEl.addEventListener('mouseover', (evt) => {
-      app.workspace.trigger('hover-link', {
+      this.plugin.app.workspace.trigger('hover-link', {
         event: evt,
         source: 'bases',
         hoverParent: this,
