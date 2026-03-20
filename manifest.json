@@ -1,7 +1,7 @@
 {
 	"id": "random-tasker",
 	"name": "Random Tasker",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "This plugin is designed for goal systems, habit challenges, or “life tasker” setups where you want a surprise objective instead of choosing one manually..",
 	"author": "Obsidian",
