@@ -4,6 +4,7 @@ import { Plugin, BasesView, QueryController,
   Notice,
   MarkdownRenderer,
   TFile,
+  normalizePath,
   Component} from 'obsidian';
 import {DEFAULT_SETTINGS, RandomTaskerSettings, RandomTaskerSettingsTab} from "./settings";
 
@@ -113,7 +114,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     //console.log(randomTask);
     const fileName = this.plugin.taskState.currentTaskName;
 
-    console.debug('Current task:', fileName);
+    //console.debug('Current task:', fileName);
 
     const linkEl = titleEl.createEl('a', { text: fileName ?? 'No tasks found', href: '#' });
     linkEl.onClickEvent((evt) => {
@@ -187,7 +188,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 
     if (taskFile instanceof TFile) {
       void this.plugin.app.vault.cachedRead(taskFile).then((fileText) => {
-        console.debug('Task file contents:', fileText);
+        //console.debug('Task file contents:', fileText);
         //propertiesEl.createEl('pre', { text: fileText });
         void MarkdownRenderer.render(this.app, fileText, propertiesEl,taskFile.path, component);
       });
@@ -212,7 +213,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       refreshBtn.addEventListener('click', () => {
         void (
           async () => {
-            console.debug('Refresh button clicked');
+            //console.debug('Refresh button clicked');
             const result = await this.getRandomTask();
             if (!result) {
               new Notice('No tasks found in the specified folder!');
@@ -231,7 +232,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       CompleteBtn.addEventListener('click', () => {
         void (
           async () => {
-            console.debug('Complete button clicked');
+            //console.debug('Complete button clicked');
             const result = await this.getRandomTask();
             if (!result) {
               new Notice('No tasks found in the specified folder!');
@@ -252,7 +253,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       failBtn.addEventListener('click', () => {
         void (
           async () => {
-            console.debug('Fail button clicked');
+            //console.debug('Fail button clicked');
             const result = await this.getRandomTask();
             if (!result) {
               new Notice('No tasks found in the specified folder!');
@@ -274,12 +275,12 @@ export class RandomTaskerView extends BasesView implements HoverParent {
   }
 
   private async getRandomTask(): Promise<boolean> {
-    console.debug('Getting random task...');
+    //console.debug('Getting random task...');
 
     // Collect all entries from all groups
     const AllEntries: BasesEntry[] = [];
     
-    const configuredFilePath = this.plugin.settings.TaskFolder;
+    const configuredFilePath = normalizePath(this.plugin.settings.TaskFolder);
     const filePath = configuredFilePath.length > 0 ? configuredFilePath : 'TaskList/';
 
     //console.log(configuredFilePath);
@@ -328,7 +329,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 
     // get file path from settings
     const configuredFilePath = this.plugin.settings.rewardsFile;
-    const filePath = configuredFilePath && configuredFilePath.length > 0 ? configuredFilePath : 'Rewards.md';
+    const filePath = configuredFilePath && configuredFilePath.length > 0 ? normalizePath(configuredFilePath) : 'Rewards.md';
 
     // add file extension if not present
     const finalFilePath = filePath.endsWith('.md') ? filePath : `${filePath}.md`;
@@ -383,7 +384,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 
     // get file path from settings
     const configuredFilePath = this.plugin.settings.punishmentsFile;
-    const filePath = configuredFilePath && configuredFilePath.length > 0 ? configuredFilePath : 'Punishments.md';
+    const filePath = configuredFilePath && configuredFilePath.length > 0 ? normalizePath(configuredFilePath) : 'Punishments.md';
 
     // add file extension if not present
     const finalFilePath = filePath.endsWith('.md') ? filePath : `${filePath}.md`;
