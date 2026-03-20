@@ -145,14 +145,10 @@ export class RandomTaskerView extends BasesView implements HoverParent {
       this.plugin.taskState.savedRewards.forEach((reward) => {
         const rowEl = tbodyEl.createEl('tr');
         rowEl.createEl('td', { text: reward, cls: 'reward-cell' });
-        rowEl.createEl('td').createEl('button', { text: 'Remove', cls: 'remove-reward-btn' }).addEventListener('click', async () => {
+        rowEl.createEl('td').createEl('button', { text: 'Remove', cls: 'remove-reward-btn' }).addEventListener('click', () => {
           this.plugin.taskState.savedRewards = this.plugin.taskState.savedRewards?.filter((r) => r !== reward);
-          void (
-              async () => {
-                await this.plugin.saveSettings();
-              } 
-          )
-          this.displayDashboard();
+          void this.plugin.saveSettings();
+          this.onDataUpdated();
         });
       });
     } else {
