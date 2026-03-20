@@ -6,3 +6,170 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+.weekly-task-dashboard {
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--color-base-100);
+  padding-bottom: 1rem;
+}
+
+.task-title {
+  margin: 0;
+  font-size: 2em;
+  color: var(--text-normal);
+}
+
+.task-title a {
+  color: var(--color-base-100);
+  text-decoration: none;
+}
+
+.task-title a:hover {
+  text-decoration: underline;
+}
+
+.reward-display, .punishment-display {
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--color-accent)
+}
+
+.reward-display, .reward-header {
+  margin-bottom: 1rem;
+  color: var(--color-accent);
+}
+
+.punishment-display, .punishment-header {
+  margin-bottom: 1rem;
+  color: var(--color-accent);
+}
+
+/* Table styles for rewards and punishments */
+.reward-table, .punishment-table {
+  width: 100%;
+  font-size: 0.95em;
+  box-sizing: content-box;
+  border-collapse: collapse;
+}
+
+.reward-table tr, .punishment-table tr {
+  text-align: left;
+  padding: 6px 10px;
+  margin: 0.5 rem;
+  color: var(--text-normal)
+}
+
+.reward-table tr:not(:last-child) td, 
+.punishment-table tr:not(:last-child) td {
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.reward-table .remove-reward-btn,
+.punishment-table .remove-punishment-btn {
+  background: var(--interactive-normal);
+  border: none;
+  color: var(--color-red);
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.reward-table .remove-reward-btn:hover,
+.punishment-table .remove-punishment-btn:hover {
+  background: var(--interactive-hover);
+  border: none;
+  color: var(--color-red);
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+
+
+.dashboard-properties {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-properties .properties-header {
+  margin-bottom: 1rem;
+  color: var(--color-accent);
+}
+
+.property-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 1rem;
+  padding: 0.75rem;
+  background-color: var(--background-secondary);
+  border-radius: 4px;
+}
+
+.property-label {
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.property-value {
+  color: var(--text-normal);
+  word-break: break-word;
+}
+
+.dashboard-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.dashboard-actions button {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.dashboard-actions button:hover {
+  opacity: 0.8;
+}
+
+.dashboard-actions button:active {
+  opacity: 0.6;
+}
+
+.dashboard-actions button.good-event {
+  background-color: var(--color-green);
+  color: var(--text-on-green);
+}
+
+.dashboard-actions button.good-event:hover {
+  background-color: var(--color-green-hover);
+}
+
+.dashboard-actions button.bad-event {
+  background-color: var(--color-red);
+  color: var(--text-on-red);
+}
+
+.dashboard-actions button.bad-event:hover {
+  background-color: var(--color-red-hover);
+}
+
+.dashboard-actions button.neutral-event {
+  background-color: var(--color-accent);
+  color: var(--text-on-accent);
+}
+
+.dashboard-actions button.neutral-event:hover {
+  background-color: var(--color-accent-hover);
+}
+
