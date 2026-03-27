@@ -11,6 +11,9 @@ import {DEFAULT_SETTINGS, RandomTaskerSettings, RandomTaskerSettingsTab} from ".
 //save states
 import { RandomTaskerState } from "./taskState";
 
+//import utility functions
+import { getRandomTask } from './utils/rollTasks';
+
 export const randomTaskerView = 'random-tasker-view';
 
 // Remember to rename these classes and interfaces!
@@ -212,8 +215,12 @@ export class RandomTaskerView extends BasesView implements HoverParent {
         void (
           async () => {
             //console.debug('Refresh button clicked');
-            const result = await this.getRandomTask();
-            if (!result) {
+            //TODO: Change to using utils
+            const result = await getRandomTask(this.plugin.app.vault, this.plugin.settings.TaskFolder);
+            if (result) {
+              this.plugin.taskState.currentTaskPath = result.path;
+              this.plugin.taskState.currentTaskName = result.name;
+            } else {
               new Notice('No tasks found in the specified folder!');
               return;
             }
@@ -231,8 +238,11 @@ export class RandomTaskerView extends BasesView implements HoverParent {
         void (
           async () => {
             //console.debug('Complete button clicked');
-            const result = await this.getRandomTask();
-            if (!result) {
+            const result = await getRandomTask(this.plugin.app.vault, this.plugin.settings.TaskFolder);
+            if (result) {
+              this.plugin.taskState.currentTaskPath = result.path;
+              this.plugin.taskState.currentTaskName = result.name;
+            } else {
               new Notice('No tasks found in the specified folder!');
               return;
             }
@@ -252,8 +262,11 @@ export class RandomTaskerView extends BasesView implements HoverParent {
         void (
           async () => {
             //console.debug('Fail button clicked');
-            const result = await this.getRandomTask();
-            if (!result) {
+            const result = await getRandomTask(this.plugin.app.vault, this.plugin.settings.TaskFolder);
+            if (result) {
+              this.plugin.taskState.currentTaskPath = result.path;
+              this.plugin.taskState.currentTaskName = result.name;
+            } else {
               new Notice('No tasks found in the specified folder!');
               return;
             }
@@ -272,6 +285,9 @@ export class RandomTaskerView extends BasesView implements HoverParent {
     
   }
 
+  /* Outdated function, now using utils/rollTasks.ts
+  To be deleted in future iterations, currently commented out in case we want to revert back to this implementation which uses the data object directly instead of the vault API. This is because the current implementation relies on the structure of the data object, which may change in future versions of Obsidian or may not be consistent across different users' vaults. The new implementation using the vault API is more robust and should work across different vault structures and Obsidian versions.
+  
   private async getRandomTask(): Promise<boolean> {
     //console.debug('Getting random task...');
 
@@ -313,6 +329,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 
     return true;
   }
+    */
 
   private async rollReward(){
     /*
