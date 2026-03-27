@@ -150,6 +150,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
         const rowEl = tbodyEl.createEl('tr');
         rowEl.createEl('td', { text: reward, cls: 'reward-cell' });
         rowEl.createEl('td').createEl('button', { text: '❌', cls: 'remove-reward-btn' }).addEventListener('click', () => {
+          //TODO: Improve this to avoid removing duplications as well
           this.plugin.taskState.savedRewards = this.plugin.taskState.savedRewards?.filter((r) => r !== reward);
           void this.plugin.saveSettings();
           this.onDataUpdated();
@@ -169,6 +170,7 @@ export class RandomTaskerView extends BasesView implements HoverParent {
         const rowEl = tbodyEl.createEl('tr');
         rowEl.createEl('td', { text: punishment, cls: 'punishment-cell' });
         rowEl.createEl('td').createEl('button', { text: '❌', cls: 'remove-punishment-btn' }).addEventListener('click', () => {
+          //TODO: Improve this to avoid removing duplications as well
           this.plugin.taskState.savedPunishments = this.plugin.taskState.savedPunishments?.filter((p) => p !== punishment);
           void this.plugin.saveSettings();
           this.onDataUpdated();
