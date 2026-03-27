@@ -1,13 +1,8 @@
-import { Plugin, BasesView, QueryController, 
-	HoverParent, HoverPopover, Keymap,
+import { Plugin,
   BasesEntry, 
-  Notice,
-  MarkdownRenderer,
-  TFile,
-  normalizePath,
-  Component} from 'obsidian';
+  normalizePath} from 'obsidian';
 
-export getRandomTask(TaskFilesPath: String): Promise<BasesEntry | false> {
+export function getRandomTask(TaskFolder: string): Promise<BasesEntry | false> {
      /*
     Input; None
     Output: BasesEntry object representing the randomly selected task, or false if no tasks are found
@@ -23,24 +18,18 @@ export getRandomTask(TaskFilesPath: String): Promise<BasesEntry | false> {
     // Collect all entries from all groups
     const AllEntries: BasesEntry[] = [];
     
-    const configuredFilePath = normalizePath(this.plugin.settings.TaskFolder);
+    const configuredFilePath = normalizePath(TaskFolder);
     const filePath = configuredFilePath.length > 0 ? configuredFilePath : 'TaskList/';
 
     //console.log(configuredFilePath);
 
     //console.log(this.data);
-    for (const group of this.data.groupedData) {
-      //console.log(group);
-      for (const entry of group.entries) {
-        if (entry.file.path.startsWith(filePath)) {
-          //console.log(entry);
-          AllEntries.push(entry);
-        }
-      }
-    }
+    //TODO: rewrite this to use the vault API to get all files in the folder, then filter the entries based on that list of files. This is because the current implementation relies on the structure of the data object, which may change in future versions of Obsidian or may not be consistent across different users' vaults.
+    
 
     //console.debug(`Found ${AllEntries.length} tasks in folder "${filePath}"`);
 
+    //TODO: Properly handle return cases
     // If no entries, show a message
     if (AllEntries.length === 0) {
       return false;
@@ -50,9 +39,6 @@ export getRandomTask(TaskFilesPath: String): Promise<BasesEntry | false> {
     const randomTask =
       AllEntries[Math.floor(Math.random() * AllEntries.length)]!;
 
-    // Update the current task state
-    this.currentTask = randomTask;
-    await this.plugin.saveState();
-
+    //TODO: Figure out how to handle return cases
     return randomTask;
   }
