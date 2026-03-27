@@ -92,8 +92,6 @@ export class RandomTaskerView extends BasesView implements HoverParent {
 	// or data change in the vault which may affect your view. For now,
 	// simply draw "Hello World" to screen.
 	public onDataUpdated(): void {
-	
-	const { app } = this;
 
     // Retrieve the user configured order set in the Properties menu.
     //const order = this.config.getOrder();

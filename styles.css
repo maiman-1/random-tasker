@@ -58,9 +58,12 @@ If your plugin does not need CSS, delete this file.
 
 .reward-table tr, .punishment-table tr {
   text-align: left;
-  padding: 6px 10px;
-  margin: 0.5 rem;
   color: var(--text-normal)
+}
+
+.reward-table td,
+.punishment-table td {
+  padding: 1rem;
 }
 
 .reward-table tr:not(:last-child) td, 
