@@ -1,7 +1,7 @@
 {
 	"id": "random-tasker",
 	"name": "Random Tasker",
-	"version": "1.0.2",
+	"version": "1.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "Randomly assign yourself a random task, reward yourself on completion and punish yourself on failure.",
 	"author": "Obsidian",
