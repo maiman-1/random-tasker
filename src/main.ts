@@ -13,6 +13,7 @@ import { RandomTaskerState } from "./taskState";
 
 //import utility functions
 import { getRandomTask } from './utils/rollTasks';
+import { getRandomLineFromVaultFile } from './utils/getRandomLineFromVaultFile';
 
 export const randomTaskerView = 'random-tasker-view';
 
@@ -246,10 +247,12 @@ export class RandomTaskerView extends BasesView implements HoverParent {
               new Notice('No tasks found in the specified folder!');
               return;
             }
-            const rewardResult = await this.rollReward();
-            if (!rewardResult) {
-              // If rolling a reward failed, we can choose to either stop here or continue to get a new task. For now, let's just show a notice and continue.
-              //new Notice('Failed to roll a reward. Please check your rewards file and settings.');
+            const rewardResult = await getRandomLineFromVaultFile(this.plugin.app.vault, this.plugin.settings.rewardsFile ?? '');
+            if (rewardResult) {
+              this.plugin.taskState.savedRewards?.push(rewardResult);
+              await this.plugin.saveState();
+            }else {
+              new Notice('Failed to roll a reward. Please check your rewards file and settings.');
               return;
             }
             this.onDataUpdated();
@@ -270,10 +273,13 @@ export class RandomTaskerView extends BasesView implements HoverParent {
               new Notice('No tasks found in the specified folder!');
               return;
             }
-            const punishmentResult = await this.rollPunishment();
-            if (!punishmentResult) {
+            const punishmentResult = await getRandomLineFromVaultFile(this.plugin.app.vault, this.plugin.settings.punishmentsFile ?? '' );
+            if (punishmentResult) {
               // If rolling a punishment failed, we can choose to either stop here or continue to get a new task. For now, let's just show a notice and continue.
-              //new Notice('Failed to roll a punishment. Please check your punishments file and settings.');
+              this.plugin.taskState.savedPunishments?.push(punishmentResult);
+              await this.plugin.saveState();
+            }else {
+              new Notice('Failed to roll a punishment. Please check your punishments file and settings.');
               return;
             }
             this.onDataUpdated();
