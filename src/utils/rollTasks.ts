@@ -1,8 +1,11 @@
-import { Plugin,
+import {
   BasesEntry, 
-  normalizePath} from 'obsidian';
+  normalizePath
+} from 'obsidian';
 
-export function getRandomTask(TaskFolder: string): Promise<BasesEntry | false> {
+export function getRandomTask(
+    TaskFolder: string
+): Promise<BasesEntry | false> {
      /*
     Input; None
     Output: BasesEntry object representing the randomly selected task, or false if no tasks are found
